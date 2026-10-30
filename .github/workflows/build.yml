@@ -1,0 +1,34 @@
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Extrair projeto
+        run: unzip -o projeto.zip -d src_projeto
+
+      - name: Instalar Gradle 2.14.1
+        run: |
+          wget -q https://services.gradle.org/distributions/gradle-2.14.1-bin.zip
+          unzip -q gradle-2.14.1-bin.zip
+          echo "$PWD/gradle-2.14.1/bin" >> $GITHUB_PATH
+
+      - name: Compilar
+        working-directory: src_projeto
+        run: gradle setupCIWorkspace build --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LegitClient
+          path: src_projeto/build/libs/LegitClient-1.0.0.jar
